@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:tns="http://www.activiti.org/test" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" expressionLanguage="http://www.w3.org/1999/XPath" id="m1535334043996" name="" targetNamespace="http://www.activiti.org/test" typeLanguage="http://www.w3.org/2001/XMLSchema">
+  <process id="shelfProcess" isClosed="false" isExecutable="true" name="上架流程" processType="None">
+    <startEvent id="_2" name="StartEvent"/>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_3" name="ExclusiveGateway"/>
+    <userTask activiti:assignee="#{assignee}" activiti:exclusive="true" id="writeInfo" name="填写申请"/>
+    <sequenceFlow id="_6" sourceRef="_2" targetRef="writeInfo"/>
+    <sequenceFlow id="_7" sourceRef="writeInfo" targetRef="_3"/>
+    <userTask activiti:assignee="#{assignee}" activiti:exclusive="true" id="City_Root" name="市公司活动管理员">
+      <documentation id="City_Root_D_1"/>
+    </userTask>
+    <userTask activiti:assignee="#{assignee}" activiti:exclusive="true" id="City_Market_Manager" name="市公司市场部主任"/>
+    <sequenceFlow id="_10" name="县级审批" sourceRef="_3" targetRef="City_Root">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${scProcessExpressionService.contain(curRole,'County_Root')}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_11" name="市级审批" sourceRef="_3" targetRef="City_Market_Manager">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${scProcessExpressionService.contain(curRole,'City_Root')}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask activiti:assignee="#{assignee}" activiti:exclusive="true" id="updateInfo" name="调整申请信息"/>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_14" name="ExclusiveGateway"/>
+    <endEvent id="_15" name="EndEvent"/>
+    <sequenceFlow id="_16" sourceRef="City_Market_Manager" targetRef="_14">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${scProcessExpressionService.contain(curRole,'City_Market_Manager')}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_17" name="驳回" sourceRef="_14" targetRef="updateInfo">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${(operationType==10000&&scProcessExpressionService.contain(curRole,'City_Market_Manager'))}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask activiti:delegateExpression="${scUpdateOfferStatusServiceDelegate}" activiti:exclusive="true" id="updateOfferStatus" name="商品上架"/>
+    <sequenceFlow id="_25" name="重新申请审批" sourceRef="updateInfo" targetRef="_3">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${operationType==20001}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_27" name="通过" sourceRef="_14" targetRef="updateOfferStatus">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${operationType==10001}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_28" name="ExclusiveGateway"/>
+    <sequenceFlow id="_29" sourceRef="City_Root" targetRef="_28">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${scProcessExpressionService.contain(curRole,'City_Root')}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_30" name="驳回" sourceRef="_28" targetRef="updateInfo">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${operationType==10000}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_31" name="通过" sourceRef="_28" targetRef="City_Market_Manager">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${operationType==10001&&scProcessExpressionService.contain(curRole,'City_Root')}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_32" sourceRef="updateOfferStatus" targetRef="_15"/>
+    <serviceTask activiti:delegateExpression="${scResetOfferStatusServiceDelegate}" activiti:exclusive="true" id="resetOfferStatus" name="放弃申请"/>
+    <sequenceFlow id="_8" sourceRef="resetOfferStatus" targetRef="_15"/>
+    <sequenceFlow id="_9" name="放弃审批" sourceRef="updateInfo" targetRef="resetOfferStatus">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${operationType==20000}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram documentation="background=#FFFFFF;count=1;horizontalcount=1;orientation=0;width=842.4;height=1195.2;imageableWidth=832.4;imageableHeight=1185.2;imageableX=5.0;imageableY=5.0" id="Diagram-_1" name="New Diagram">
+    <bpmndi:BPMNPlane bpmnElement="shelfProcess">
+      <bpmndi:BPMNShape bpmnElement="_2" id="Shape-_2">
+        <omgdc:Bounds height="32.0" width="32.0" x="90.0" y="305.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_3" id="Shape-_3" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="415.0" y="305.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="writeInfo" id="Shape-writeInfo">
+        <omgdc:Bounds height="55.0" width="85.0" x="230.0" y="295.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="City_Root" id="Shape-City_Root">
+        <omgdc:Bounds height="55.0" width="115.0" x="495.0" y="165.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="115.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="City_Market_Manager" id="Shape-City_Market_Manager">
+        <omgdc:Bounds height="55.0" width="110.0" x="505.0" y="445.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="110.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="updateInfo" id="Shape-updateInfo">
+        <omgdc:Bounds height="55.0" width="100.0" x="820.0" y="285.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="100.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_14" id="Shape-_14" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="950.0" y="545.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_15" id="Shape-_15">
+        <omgdc:Bounds height="32.0" width="32.0" x="1440.0" y="295.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="updateOfferStatus" id="Shape-updateOfferStatus">
+        <omgdc:Bounds height="55.0" width="85.0" x="1225.0" y="435.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_28" id="Shape-_28" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="740.0" y="170.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="resetOfferStatus" id="Shape-resetOfferStatus">
+        <omgdc:Bounds height="55.0" width="85.0" x="1220.0" y="165.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="_17" id="BPMNEdge__17" sourceElement="_14" targetElement="updateInfo">
+        <omgdi:waypoint x="935.0" y="561.0"/>
+        <omgdi:waypoint x="870.0" y="430.0"/>
+        <omgdi:waypoint x="870.0" y="340.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="15.0" width="0.0" x="0.0" y="-15.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_16" id="BPMNEdge__16" sourceElement="City_Market_Manager" targetElement="_14">
+        <omgdi:waypoint x="560.0" y="515.0"/>
+        <omgdi:waypoint x="750.0" y="645.0"/>
+        <omgdi:waypoint x="966.0" y="577.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="28.0" x="0.0" y="25.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_25" id="BPMNEdge__25" sourceElement="updateInfo" targetElement="_3">
+        <omgdi:waypoint x="805.0" y="320.0"/>
+        <omgdi:waypoint x="625.0" y="320.0"/>
+        <omgdi:waypoint x="446.0" y="320.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_27" id="BPMNEdge__27" sourceElement="_14" targetElement="updateOfferStatus">
+        <omgdi:waypoint x="997.0" y="561.0"/>
+        <omgdi:waypoint x="1085.0" y="460.0"/>
+        <omgdi:waypoint x="1225.0" y="460.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="-75.0" x="1.0" y="25.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_29" id="BPMNEdge__29" sourceElement="City_Root" targetElement="_28">
+        <omgdi:waypoint x="625.0" y="185.0"/>
+        <omgdi:waypoint x="685.0" y="185.0"/>
+        <omgdi:waypoint x="741.0" y="185.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="7.0" x="0.0" y="30.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_6" id="BPMNEdge__6" sourceElement="_2" targetElement="writeInfo">
+        <omgdi:waypoint x="136.7408522978788" y="325.0"/>
+        <omgdi:waypoint x="180.0" y="325.0"/>
+        <omgdi:waypoint x="230.0" y="325.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_7" id="BPMNEdge__7" sourceElement="writeInfo" targetElement="_3">
+        <omgdi:waypoint x="330.0" y="320.0"/>
+        <omgdi:waypoint x="360.0" y="320.0"/>
+        <omgdi:waypoint x="416.0" y="320.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_8" id="BPMNEdge__8" sourceElement="resetOfferStatus" targetElement="_15">
+        <omgdi:waypoint x="1320.0" y="192.5"/>
+        <omgdi:waypoint x="1455.0" y="250.0"/>
+        <omgdi:waypoint x="1455.0" y="295.0312805773287"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_9" id="BPMNEdge__9" sourceElement="updateInfo" targetElement="resetOfferStatus">
+        <omgdi:waypoint x="935.0" y="312.5"/>
+        <omgdi:waypoint x="1220.0" y="192.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="5.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_31" id="BPMNEdge__31" sourceElement="_28" targetElement="City_Market_Manager">
+        <omgdi:waypoint x="760.0" y="213.0"/>
+        <omgdi:waypoint x="760.0" y="355.0"/>
+        <omgdi:waypoint x="615.0" y="472.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-2.0" width="0.0" x="0.0" y="-35.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_30" id="BPMNEdge__30" sourceElement="_28" targetElement="updateInfo">
+        <omgdi:waypoint x="787.0" y="186.0"/>
+        <omgdi:waypoint x="870.0" y="230.0"/>
+        <omgdi:waypoint x="870.0" y="285.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="34.0" width="84.0" x="0.0" y="-34.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_11" id="BPMNEdge__11" sourceElement="_3" targetElement="City_Market_Manager">
+        <omgdi:waypoint x="430.0" y="351.0"/>
+        <omgdi:waypoint x="430.0" y="415.0"/>
+        <omgdi:waypoint x="505.0" y="472.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="1.0" width="0.0" x="0.0" y="-160.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_10" id="BPMNEdge__10" sourceElement="_3" targetElement="City_Root">
+        <omgdi:waypoint x="435.0" y="294.0"/>
+        <omgdi:waypoint x="435.0" y="235.0"/>
+        <omgdi:waypoint x="495.0" y="192.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="1.0" width="0.0" x="0.0" y="165.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_32" id="BPMNEdge__32" sourceElement="updateOfferStatus" targetElement="_15">
+        <omgdi:waypoint x="1325.0" y="462.5"/>
+        <omgdi:waypoint x="1455.0" y="370.0"/>
+        <omgdi:waypoint x="1455.0" y="326.9687194226713"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
