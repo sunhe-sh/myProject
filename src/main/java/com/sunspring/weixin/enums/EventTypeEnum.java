@@ -10,9 +10,10 @@ public enum EventTypeEnum {
     SUBSCRIBE("subscribe","订阅事件"),
     UNSUBSCRIBE("unsubscribe","取消订阅事件"),
     SCAN("SCAN","二维码扫码（用户已关注时的事件推送）"),
-    LOCATION("LOCATION","上报地理位置时间"),
+    LOCATION("LOCATION","上报地理位置事件"),
     CLICK("CLICK","点击菜单拉取消息时的事件"),
     SCANCODE_PUSH("scancode_push","点击菜单扫码时的事件"),
+    LOCATION_SELECT("location_select","点击菜单地理位置选择器时的事件"),
     VIEW("VIEW","点击菜单跳转链接时的事件");
 
     private String event;

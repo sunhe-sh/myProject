@@ -97,6 +97,8 @@ public class ServiceController {
                 case SCANCODE_PUSH:
                     scancodePushEventHandler(inMsg, outMsg);
                     break;
+                case LOCATION_SELECT:
+                    break;
                 default:
                     break;
             }

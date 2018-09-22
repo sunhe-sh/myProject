@@ -63,6 +63,10 @@ public class InMessageDTO {
      */
     private String EventKey;
     /**
+     * 二维码的ticket，可用来换取二维码图片
+     */
+    private String Ticket;
+    /**
      * 	地理位置纬度
      */
     private Double Latitude;
@@ -79,4 +83,22 @@ public class InMessageDTO {
      * 扫描信息
      */
     private ScanCodeItem ScanCodeInfo;
+
+    /**
+     * 地理位置纬度
+     */
+    private Double Location_X;
+    /**
+     * 地理位置经度
+     */
+    private Double Location_Y;
+    /**
+     * 地图缩放大小
+     */
+    private Double Scale;
+    /**
+     * 地理位置信息
+     */
+    private String Label;
+
 }

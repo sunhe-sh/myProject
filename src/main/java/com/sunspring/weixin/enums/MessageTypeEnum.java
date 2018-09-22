@@ -16,7 +16,8 @@ public enum MessageTypeEnum {
     VIDEO("video","视频"),
     MUSIC("music","音乐"),
     NEWS("news","图文"),
-    EVENT("event","事件");
+    EVENT("event","事件"),
+    LOCATION("location","地理位置消息");
 
     private String type;
     private String typeDesc;
