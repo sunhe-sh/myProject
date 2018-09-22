@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Setter
 @Getter
 @ToString
-@XmlRootElement(name = "xml")
+@XmlRootElement(name = "Articles")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ArticleItem {
 

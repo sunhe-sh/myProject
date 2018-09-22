@@ -5,9 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 
 /**
  * @author sunhe
@@ -77,4 +75,8 @@ public class InMessageDTO {
      */
     private Double Precision;
 
+    /**
+     * 扫描信息
+     */
+    private ScanCodeItem ScanCodeInfo;
 }

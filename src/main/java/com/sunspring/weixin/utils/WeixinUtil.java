@@ -39,20 +39,16 @@ public class WeixinUtil {
             "          \"name\":\"当前时间\",\n" +
             "          \"key\":\"V1001_CURRENT_TIME\"\n" +
             "      },\n" +
-            "      {\n" +
-            "           \"name\":\"菜单\",\n" +
-            "           \"sub_button\":[\n" +
-            "           {    \n" +
-            "               \"type\":\"view\",\n" +
-            "               \"name\":\"搜索\",\n" +
-            "               \"url\":\"http://www.soso.com/\"\n" +
-            "            },\n" +
-            "            {\n" +
-            "               \"type\":\"click\",\n" +
-            "               \"name\":\"赞一下我们\",\n" +
-            "               \"key\":\"V1001_GOOD\"\n" +
-            "            }]\n" +
-            "       }]\n" +
+            "     {    \n" +
+            "          \"type\":\"scancode_push\",\n" +
+            "          \"name\":\"扫码扫码\",\n" +
+            "          \"key\":\"V1001_SCANCODE_PUSH\"\n" +
+            "      },\n" +
+            "     {    \n" +
+            "          \"type\":\"location_select\",\n" +
+            "          \"name\":\"选择地点\",\n" +
+            "          \"key\":\"V1001_LOCATION_SELECT\"\n" +
+            "      }" +
             " }";
     public static void createMenu(String jsonParam) {
         JSONObject resultJson =  HttpUtil.post(CREATE_MENU_URL.replace("ACCESS_TOKEN",getAccessToken()),jsonParam);

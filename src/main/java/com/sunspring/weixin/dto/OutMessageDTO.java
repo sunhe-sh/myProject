@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 /**
  * @author sunhe
@@ -74,6 +75,6 @@ public class OutMessageDTO {
      * 多条图文消息信息，默认第一个item为大图,注意，如果图文数超过8，则将会无响应
      */
     @XmlElementWrapper(name = "Articles")
-    private ArticleItem[] item;
+    private List<ArticleItem> item;
 
 }
