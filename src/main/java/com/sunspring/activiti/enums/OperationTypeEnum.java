@@ -38,9 +38,9 @@ public enum OperationTypeEnum {
 
     public static String getTypeDesc(int value){
         OperationTypeEnum[] values = OperationTypeEnum.values();
-        for (OperationTypeEnum offeringTypeEnum : values) {
-            if(offeringTypeEnum.getValue() == value){
-                return offeringTypeEnum.getTypeDesc();
+        for (OperationTypeEnum operationTypeEnum : values) {
+            if(operationTypeEnum.getValue() == value){
+                return operationTypeEnum.getTypeDesc();
             }
         }
         throw new IllegalArgumentException("没有找到对应的数据！");

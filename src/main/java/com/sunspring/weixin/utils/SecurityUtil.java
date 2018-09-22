@@ -1,4 +1,4 @@
-package com.sunspring.utils;
+package com.sunspring.weixin.utils;
 
 import java.security.MessageDigest;
 

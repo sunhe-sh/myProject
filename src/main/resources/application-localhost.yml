@@ -24,3 +24,7 @@ server:
     accesslog:
       enabled: true
     basedir: target/tomcat
+#  ssl:
+#    key-store: classpath:mykeys.jks
+#    key-password: 123456
+#    key-store-password: 123456
