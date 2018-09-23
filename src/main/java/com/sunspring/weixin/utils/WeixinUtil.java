@@ -9,19 +9,30 @@ import org.springframework.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author sunhe
+ */
 @Component
 public class WeixinUtil {
 
     public static final String TOKEN = "wx_service_sh";
     private static final String APP_ID = "wx132b689efeb0f7d7";
     private static final String APP_SECRET = "c346c42697194237ba92cf203658b58a";
-    //创建自定义菜单url
+    /**
+     * 创建自定义菜单接口
+     */
     private static final String CREATE_MENU_URL = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN";
-    //删除自定义菜单url
+    /**
+     * 删除自定义菜单接口
+     */
     private static final String DELETE_MENU_URL = "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=ACCESS_TOKEN";
-    //获取accessToke
+    /**
+     * 获取accessToke接口
+     */
     private static final String GET_ACCESSTOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
-    //发送模板消息
+    /**
+     * 发送模板消息接口
+     */
     private static final String SEND_TEMPLATE_URL = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
 
     private static String accessToken;
