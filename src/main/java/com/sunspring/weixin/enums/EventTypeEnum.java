@@ -14,6 +14,7 @@ public enum EventTypeEnum {
     CLICK("CLICK","点击菜单拉取消息时的事件"),
     SCANCODE_PUSH("scancode_push","点击菜单扫码时的事件"),
     LOCATION_SELECT("location_select","点击菜单地理位置选择器时的事件"),
+    TEMPLATE_SEND_JOB_FINISH("TEMPLATESENDJOBFINISH","模板消息发送完成"),
     VIEW("VIEW","点击菜单跳转链接时的事件");
 
     private String event;
