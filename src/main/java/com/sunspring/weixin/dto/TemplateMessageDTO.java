@@ -55,11 +55,11 @@ public class TemplateMessageDTO {
     @Override
     public String toString() {
         return "{\n" +
-                "           \"touser\":\"" + touser + "\",\n" +
-                "           \"template_id\":\"" + template_id + "\",\n" +
-                            (StringUtils.isEmpty(url)? "" : "\"url\":\"" + url + "\"\n")+
-                            generateMiniprogram() +
-                "           \"data\":" +generateData() +
+                "    \"touser\":\"" + touser + "\",\n" +
+                "    \"template_id\":\"" + template_id + "\",\n" +
+                     (StringUtils.isEmpty(url)? "" : "\"url\":\"" + url + "\",\n")+
+                     generateMiniprogram() +
+                "    \"data\":" +generateData() +
                 "}";
     }
 
