@@ -45,7 +45,13 @@ public class WeChatUtil {
      */
     private static final String QRCODE_GET_URL = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=TICKET";
 
+    /**
+     * 通信token
+     */
     private static String accessToken;
+    /**
+     * token有效期
+     */
     private static Long expireTime;
     /**
      * 获取Accesstoken凭据
@@ -170,6 +176,15 @@ public class WeChatUtil {
             return QRCODE_GET_URL.replace("TICKET",  (String)resultJson.get("ticket"));
         }
         return resultJson.toString();
+    }
+
+    /**
+     * 返回二维码图片url
+     * @param ticket 二维码ticket
+     * @return 二维码图片地址
+     */
+    public static String getQrcodeUrl(String ticket) {
+        return QRCODE_GET_URL.replace("TICKET",  ticket);
     }
 
     public static void main(String[] args) {
