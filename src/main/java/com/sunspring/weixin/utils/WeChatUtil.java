@@ -1,7 +1,9 @@
 package com.sunspring.weixin.utils;
 
+import com.sunspring.weixin.dto.CreateQrcodeParamDTO;
 import com.sunspring.weixin.dto.TemplateMessageDTO;
 import com.sunspring.weixin.dto.TemplateMessageDataItem;
+import com.sunspring.weixin.enums.QrcodeActionNameEnum;
 import net.sf.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -13,7 +15,7 @@ import java.util.Map;
  * @author sunhe
  */
 @Component
-public class WeixinUtil {
+public class WeChatUtil {
 
     public static final String TOKEN = "wx_service_sh";
     private static final String APP_ID = "wx132b689efeb0f7d7";
@@ -34,6 +36,14 @@ public class WeixinUtil {
      * 发送模板消息接口
      */
     private static final String SEND_TEMPLATE_URL = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
+    /**
+     * 生成带参数的二维码接口
+     */
+    private static final String QRCODE_CREATE_URL = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=ACCESS_TOKEN";
+    /**
+     * 通过ticket换取二维码接口
+     */
+    private static final String QRCODE_GET_URL = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=TICKET";
 
     private static String accessToken;
     private static Long expireTime;
@@ -43,15 +53,15 @@ public class WeixinUtil {
      */
     private static String getAccessToken() {
         //accessToken为空 或 已经失效时进行重新获取
-        if(StringUtils.isEmpty(WeixinUtil.accessToken) || System.currentTimeMillis() > WeixinUtil.expireTime){
+        if(StringUtils.isEmpty(WeChatUtil.accessToken) || System.currentTimeMillis() > WeChatUtil.expireTime){
             JSONObject jsonObject = HttpUtil.get(GET_ACCESSTOKEN_URL.replace("APPID",APP_ID).replace("APPSECRET",APP_SECRET));
             //凭据
-            WeixinUtil.accessToken = jsonObject.getString("access_token");
+            WeChatUtil.accessToken = jsonObject.getString("access_token");
             //有效期
             Long expires_in = jsonObject.getLong("expires_in");
-            WeixinUtil.expireTime = System.currentTimeMillis() + ((expires_in - 60) * 1000);
+            WeChatUtil.expireTime = System.currentTimeMillis() + ((expires_in - 60) * 1000);
         }
-        return WeixinUtil.accessToken;
+        return WeChatUtil.accessToken;
     }
 
     private static String jsonMenu = "{\n" +
@@ -109,13 +119,16 @@ public class WeixinUtil {
             "           }\n" +
             "       }";
 
+
+    private static String qrcodeParam = "{\"expire_seconds\": 604800, \"action_name\": \"QR_STR_SCENE\", \"action_info\": {\"scene\": {\"scene_str\": \"SCAN_QRCODE_NUM\",\"scene_id\":}}}";
+
     /**
      * 创建自定义菜单
      * @param jsonParam json数据
      */
     public static void createMenu(String jsonParam) {
         JSONObject resultJson =  HttpUtil.post(CREATE_MENU_URL.replace("ACCESS_TOKEN",getAccessToken()),jsonParam);
-        System.out.println("createMenu>>>>>>>>>>>>>>>>>>>>"+resultJson);
+        System.out.println(">>>createMenu>>>>>>>>>>>>>>>>>>>>"+resultJson);
     }
 
     /**
@@ -123,7 +136,7 @@ public class WeixinUtil {
      */
     public static void deleteMenu() {
         JSONObject resultJson =  HttpUtil.get(DELETE_MENU_URL.replace("ACCESS_TOKEN",getAccessToken()));
-        System.out.println("deleteMenu>>>>>>>>>>>>>>>>>>>>"+resultJson);
+        System.out.println(">>>deleteMenu>>>>>>>>>>>>>>>>>>>>"+resultJson);
     }
 
     /**
@@ -131,19 +144,58 @@ public class WeixinUtil {
      */
     public static void sendTemplateMessage(TemplateMessageDTO messageDTO) {
         JSONObject resultJson =  HttpUtil.post(SEND_TEMPLATE_URL.replace("ACCESS_TOKEN",getAccessToken()),messageDTO.toString());
-        System.out.println("sendTemplateMessage>>>>>>>>>>>>>>>>>" + resultJson);
+        System.out.println(">>>sendTemplateMessage>>>>>>>>>>>>>>>>>" + resultJson);
+    }
+
+    /**
+     * 创建带参数的公众号二维码图片
+     * @param paramDTO
+     * @return  ticket 获取的二维码ticket，凭借此ticket可以在有效时间内换取二维码
+     *          expire_seconds 该二维码有效时间，以秒为单位。 最大不超过2592000（即30天）
+     *          url 二维码图片解析后的地址，开发者可根据该地址自行生成需要的二维码图片
+     */
+    public static JSONObject createQrcode(CreateQrcodeParamDTO paramDTO) {
+        JSONObject resultJson =  HttpUtil.post(QRCODE_CREATE_URL.replace("ACCESS_TOKEN",getAccessToken()),paramDTO.toString());
+        System.out.println(">>>createQrcode>>>>>>>>>>>>>>>>>" + resultJson);
+        return resultJson;
+    }
+
+    /**
+     * 生成二维码图片，并返回地址
+     * @param paramDTO
+     */
+    public static String getQrcodeUrl(CreateQrcodeParamDTO paramDTO) {
+        JSONObject resultJson =  createQrcode(paramDTO);
+        if(resultJson != null && !resultJson.containsKey("errcode")){
+            return QRCODE_GET_URL.replace("TICKET",  (String)resultJson.get("ticket"));
+        }
+        return resultJson.toString();
     }
 
     public static void main(String[] args) {
 
-//        sendTemplateMsg_TEST();
+        createQrcode_TEST();
 
-        createMenu(jsonMenu);
+//        createMenu(jsonMenu);
+
 //        System.out.println(WeixinUtil.accessToken);
 //        System.out.println(getAccessToken());
 //        System.out.println(getAccessToken());
 //        System.out.println(getAccessToken());
+
+//        sendTemplateMsg_TEST();
     }
+
+    private static void createQrcode_TEST() {
+        CreateQrcodeParamDTO paramDTO = new CreateQrcodeParamDTO();
+        paramDTO.setExpire_seconds(604800L);
+        paramDTO.setAction_name(QrcodeActionNameEnum.QR_STR_SCENE.getActionName());
+        paramDTO.setScene_str("场景id");
+//        createQrcode(paramDTO);
+
+        getQrcodeUrl(paramDTO);
+    }
+
     private static void sendTemplateMsg_TEST(){
         Map<String, TemplateMessageDataItem> dataMap = new HashMap<>();
         TemplateMessageDataItem top = new TemplateMessageDataItem();

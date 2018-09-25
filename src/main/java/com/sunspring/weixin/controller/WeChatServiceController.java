@@ -1,14 +1,8 @@
 package com.sunspring.weixin.controller;
 
+import com.sunspring.weixin.dto.CreateQrcodeParamDTO;
 import com.sunspring.weixin.service.WeChatService;
-import com.sunspring.weixin.utils.JaxbUtil;
-import com.sunspring.weixin.utils.SecurityUtil;
-import com.sunspring.weixin.utils.WeixinUtil;
-import com.sunspring.weixin.dto.ArticleItem;
 import com.sunspring.weixin.dto.InMessageDTO;
-import com.sunspring.weixin.dto.OutMessageDTO;
-import com.sunspring.weixin.enums.EventTypeEnum;
-import com.sunspring.weixin.enums.MessageTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -29,11 +23,6 @@ public class WeChatServiceController {
 
     /**
      * 校验微信URL
-     * @param signature
-     * @param timestamp
-     * @param nonce
-     * @param echostr
-     * @return String
      */
     @GetMapping("")
     @ResponseBody
@@ -43,14 +32,23 @@ public class WeChatServiceController {
 
     /**
      * 消息处理
-     * @param inMsg
-     * @return String
      */
     @PostMapping("")
     @ResponseBody
     public String handleMessage(@RequestBody InMessageDTO inMsg) {
        return weChatService.handleMessage(inMsg);
     }
+
+    /**
+     * 消息处理
+     */
+    @PostMapping("/createQrcode")
+    @ResponseBody
+    public String createQrcode(@RequestBody CreateQrcodeParamDTO paramDTO) {
+       return weChatService.createQrcode(paramDTO);
+    }
+
+
 
     @GetMapping("/test")
     @ResponseBody

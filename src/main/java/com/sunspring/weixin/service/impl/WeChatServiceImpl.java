@@ -1,6 +1,7 @@
 package com.sunspring.weixin.service.impl;
 
 import com.sunspring.weixin.dto.ArticleItem;
+import com.sunspring.weixin.dto.CreateQrcodeParamDTO;
 import com.sunspring.weixin.dto.InMessageDTO;
 import com.sunspring.weixin.dto.OutMessageDTO;
 import com.sunspring.weixin.enums.EventTypeEnum;
@@ -8,7 +9,7 @@ import com.sunspring.weixin.enums.MessageTypeEnum;
 import com.sunspring.weixin.service.WeChatService;
 import com.sunspring.weixin.utils.JaxbUtil;
 import com.sunspring.weixin.utils.SecurityUtil;
-import com.sunspring.weixin.utils.WeixinUtil;
+import com.sunspring.weixin.utils.WeChatUtil;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -27,7 +28,7 @@ public class WeChatServiceImpl implements WeChatService {
 
     @Override
     public String judgeToken(String signature, String timestamp, String nonce, String echostr) {
-        String [] arr = {WeixinUtil.TOKEN, timestamp, nonce};
+        String [] arr = {WeChatUtil.TOKEN, timestamp, nonce};
         Arrays.sort(arr);
         StringBuilder sb = new StringBuilder();
         for (String tmp : arr) {
@@ -178,4 +179,8 @@ public class WeChatServiceImpl implements WeChatService {
         }
     }
 
+    @Override
+    public String createQrcode(CreateQrcodeParamDTO paramDTO) {
+        return WeChatUtil.getQrcodeUrl(paramDTO);
+    }
 }
