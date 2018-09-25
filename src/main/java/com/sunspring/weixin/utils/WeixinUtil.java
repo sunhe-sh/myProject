@@ -57,18 +57,18 @@ public class WeixinUtil {
     private static String jsonMenu = "{\n" +
             "     \"button\":[\n" +
             "     {    \n" +
-            "          \"type\":\"click\",\n" +
-            "          \"name\":\"当前时间\",\n" +
-            "          \"key\":\"V1001_CURRENT_TIME\"\n" +
-            "      },\n" +
-            "     {    \n" +
             "          \"type\":\"scancode_push\",\n" +
-            "          \"name\":\"扫码扫码\",\n" +
+            "          \"name\":\"扫码取号\",\n" +
             "          \"key\":\"V1001_SCANCODE_PUSH\"\n" +
             "      },\n" +
             "     {    \n" +
+            "          \"type\":\"click\",\n" +
+            "          \"name\":\"预约取号\",\n" +
+            "          \"key\":\"V1001_CURRENT_TIME\"\n" +
+            "      },\n" +
+            "     {    \n" +
             "          \"type\":\"location_select\",\n" +
-            "          \"name\":\"选择地点\",\n" +
+            "          \"name\":\"我的\",\n" +
             "          \"key\":\"V1001_LOCATION_SELECT\"\n" +
             "      }" +
             " }";
@@ -135,6 +135,16 @@ public class WeixinUtil {
     }
 
     public static void main(String[] args) {
+
+//        sendTemplateMsg_TEST();
+
+        createMenu(jsonMenu);
+//        System.out.println(WeixinUtil.accessToken);
+//        System.out.println(getAccessToken());
+//        System.out.println(getAccessToken());
+//        System.out.println(getAccessToken());
+    }
+    private static void sendTemplateMsg_TEST(){
         Map<String, TemplateMessageDataItem> dataMap = new HashMap<>();
         TemplateMessageDataItem top = new TemplateMessageDataItem();
         top.setValue("尊敬的XXX，您好！");
@@ -148,17 +158,8 @@ public class WeixinUtil {
         templateMessageDTO.setTouser("ohm_z1EjFrY2vTmLbRSK0haIV10w");
         templateMessageDTO.setTemplate_id("8hnejHal2RdZruS5IF3LUgbQbimSBkgugKrw8Vo0h_k");
         templateMessageDTO.setUrl("https://www.baidu.com");
-
         templateMessageDTO.setData(dataMap);
 
-
         sendTemplateMessage(templateMessageDTO);
-
-
-//        createMenu(jsonMenu);
-//        System.out.println(WeixinUtil.accessToken);
-//        System.out.println(getAccessToken());
-//        System.out.println(getAccessToken());
-//        System.out.println(getAccessToken());
     }
 }
