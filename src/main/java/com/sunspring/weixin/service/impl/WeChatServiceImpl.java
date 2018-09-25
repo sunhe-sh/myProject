@@ -1,39 +1,31 @@
-package com.sunspring.weixin;
+package com.sunspring.weixin.service.impl;
 
-import com.sunspring.weixin.utils.JaxbUtil;
-import com.sunspring.weixin.utils.SecurityUtil;
-import com.sunspring.weixin.utils.WeixinUtil;
 import com.sunspring.weixin.dto.ArticleItem;
 import com.sunspring.weixin.dto.InMessageDTO;
 import com.sunspring.weixin.dto.OutMessageDTO;
 import com.sunspring.weixin.enums.EventTypeEnum;
 import com.sunspring.weixin.enums.MessageTypeEnum;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import com.sunspring.weixin.service.WeChatService;
+import com.sunspring.weixin.utils.JaxbUtil;
+import com.sunspring.weixin.utils.SecurityUtil;
+import com.sunspring.weixin.utils.WeixinUtil;
+import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author sunhe
  */
-@Controller
-@RequestMapping("/wx")
-public class ServiceController {
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy 年 MM 月 dd 日 HH:mm:ss");
-    /**
-     * 校验微信URL
-     * 1）将token、timestamp、nonce三个参数进行字典序排序
-     * 2）将三个参数字符串拼接成一个字符串进行sha1加密
-     * 3）开发者获得加密后的字符串可与signature对比，标识该请求来源于微信
-     * @param signature
-     * @param timestamp
-     * @param nonce
-     * @param echostr
-     * @return String
-     */
-    @GetMapping("")
-    @ResponseBody
+@Service
+public class WeChatServiceImpl implements WeChatService {
+
+    private SimpleDateFormat sdf_CH = new SimpleDateFormat("yyyy 年 MM 月 dd 日 HH:mm:ss");
+
+    @Override
     public String judgeToken(String signature, String timestamp, String nonce, String echostr) {
         String [] arr = {WeixinUtil.TOKEN, timestamp, nonce};
         Arrays.sort(arr);
@@ -50,15 +42,8 @@ public class ServiceController {
         }
     }
 
-    /**
-     * 消息处理
-     * @param inMsg
-     * @return Object
-     */
-    @PostMapping("")
-    @ResponseBody
-    public Object handleMessage(@RequestBody InMessageDTO inMsg) {
-
+    @Override
+    public String handleMessage(InMessageDTO inMsg) {
         System.out.println(inMsg);
         OutMessageDTO outMsg = new OutMessageDTO();
         //设置发送方
@@ -80,24 +65,32 @@ public class ServiceController {
             //处理事件
             switch (EventTypeEnum.getEventTypeEnum(inMsg.getEvent())) {
                 case SUBSCRIBE:
+                    System.out.println(EventTypeEnum.SUBSCRIBE.getEventDesc());
                     outMsg.setMsgType(MessageTypeEnum.TEXT.getType());
                     subscribeEventHandler(inMsg, outMsg);
                     break;
                 case UNSUBSCRIBE:
+                    System.out.println(EventTypeEnum.UNSUBSCRIBE.getEventDesc());
                     break;
                 case SCAN:
+                    System.out.println(EventTypeEnum.SCAN.getEventDesc());
                     break;
                 case LOCATION:
+                    System.out.println(EventTypeEnum.LOCATION.getEventDesc());
                     break;
                 case CLICK:
+                    System.out.println(EventTypeEnum.CLICK.getEventDesc());
                     clickEventHandler(inMsg, outMsg);
                     break;
                 case VIEW:
+                    System.out.println(EventTypeEnum.VIEW.getEventDesc());
                     break;
                 case SCANCODE_PUSH:
+                    System.out.println(EventTypeEnum.SCANCODE_PUSH.getEventDesc());
                     scancodePushEventHandler(inMsg, outMsg);
                     break;
                 case LOCATION_SELECT:
+                    System.out.println(EventTypeEnum.LOCATION_SELECT.getEventDesc());
                     break;
                 default:
                     break;
@@ -106,7 +99,6 @@ public class ServiceController {
         System.out.println(JaxbUtil.convertToXml(outMsg));
         return JaxbUtil.convertToXml(outMsg);
     }
-
     /**
      * 处理二维码扫描类型按钮事件
      * @param inMsg
@@ -117,10 +109,15 @@ public class ServiceController {
         outMsg.setContent("扫码");
     }
 
+    /**
+     * 关键字回复
+     * @param inMsg
+     * @return
+     */
     private String keyWordsResponse(String inMsg){
         String outMsg = null;
         if(inMsg.contains("时间")){
-            outMsg = sdf.format(new Date());
+            outMsg = sdf_CH.format(new Date());
         } else {
             outMsg = inMsg;
         }
@@ -143,7 +140,7 @@ public class ServiceController {
      * @param outMsg
      */
     private void responseNews4SubscribeEvent(InMessageDTO inMsg, OutMessageDTO outMsg) {
-        List<ArticleItem> articleItemList = new ArrayList <>();
+        List<ArticleItem> articleItemList = new ArrayList<>();
         ArticleItem articleItem = new ArticleItem();
         articleItem.setTitle("微信公众号快速开发教程");
         articleItem.setDescription("本课程针对微信公众号实现验证接入，消息推送，处理文本，图片，事件，图文消息等类型，实现关注时回复，普通回复，根据关键字回复，自定义菜单的创建与删除，网页授权获取微信用户信息，利用微信JSSDK监听分享朋友圈事件。此外，本课程提供了与课程同步的技术文章，视频与文章结合，以便同学更好地理解。文章请进群索取。");
@@ -165,7 +162,7 @@ public class ServiceController {
                 "\n" +
                 "[坏笑]" +
                 "\n" +
-                "当前时间：" + sdf.format(new Date());
+                "当前时间：" + sdf_CH.format(new Date());
         outMsg.setContent(outSb);
     }
 
@@ -176,19 +173,9 @@ public class ServiceController {
      */
     private void clickEventHandler(InMessageDTO inMsg, OutMessageDTO outMsg){
         if("V1001_CURRENT_TIME".equals(inMsg.getEventKey())){
-            outMsg.setContent(sdf.format(new Date()));
+            outMsg.setContent(sdf_CH.format(new Date()));
             outMsg.setMsgType(MessageTypeEnum.TEXT.getType());
         }
-    }
-
-
-    @GetMapping("/test")
-    @ResponseBody
-    public Map<String, Object> testController() {
-        Map<String, Object> resultMap = new HashMap <>();
-        resultMap.put("code", 0);
-        resultMap.put("message", "request call success!");
-        return resultMap;
     }
 
 }
