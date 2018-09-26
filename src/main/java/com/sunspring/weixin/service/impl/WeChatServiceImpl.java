@@ -180,7 +180,7 @@ public class WeChatServiceImpl implements WeChatService {
     }
 
     @Override
-    public String createQrcode(CreateQrcodeParamDTO paramDTO) {
+    public Object createQrcode(CreateQrcodeParamDTO paramDTO) {
         return WeChatUtil.getQrcodeUrl(paramDTO);
     }
 }

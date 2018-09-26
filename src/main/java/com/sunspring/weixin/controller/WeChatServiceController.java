@@ -24,7 +24,7 @@ public class WeChatServiceController {
     /**
      * 校验微信URL
      */
-    @GetMapping("")
+    @GetMapping(value = "", produces = "application/text")
     @ResponseBody
     public String judgeToken(String signature, String timestamp, String nonce, String echostr) {
        return weChatService.judgeToken(signature, timestamp, nonce, echostr);
@@ -33,7 +33,7 @@ public class WeChatServiceController {
     /**
      * 消息处理
      */
-    @PostMapping("")
+    @PostMapping(value = "", produces = "application/text")
     @ResponseBody
     public String handleMessage(@RequestBody InMessageDTO inMsg) {
        return weChatService.handleMessage(inMsg);
@@ -44,7 +44,7 @@ public class WeChatServiceController {
      */
     @PostMapping("/createQrcode")
     @ResponseBody
-    public String createQrcode(@RequestBody CreateQrcodeParamDTO paramDTO) {
+    public Object createQrcode(@RequestBody CreateQrcodeParamDTO paramDTO) {
        return weChatService.createQrcode(paramDTO);
     }
 

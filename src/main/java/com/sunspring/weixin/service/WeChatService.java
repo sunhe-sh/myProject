@@ -36,5 +36,5 @@ public interface WeChatService {
      * @param paramDTO
      * @return 二维码图片URL
      */
-    String createQrcode(CreateQrcodeParamDTO paramDTO);
+    Object createQrcode(CreateQrcodeParamDTO paramDTO);
 }

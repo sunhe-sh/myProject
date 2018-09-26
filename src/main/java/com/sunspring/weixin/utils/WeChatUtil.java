@@ -170,12 +170,12 @@ public class WeChatUtil {
      * 生成二维码图片，并返回地址
      * @param paramDTO
      */
-    public static String getQrcodeUrl(CreateQrcodeParamDTO paramDTO) {
+    public static Object getQrcodeUrl(CreateQrcodeParamDTO paramDTO) {
         JSONObject resultJson =  createQrcode(paramDTO);
         if(resultJson != null && !resultJson.containsKey("errcode")){
             return QRCODE_GET_URL.replace("TICKET",  (String)resultJson.get("ticket"));
         }
-        return resultJson.toString();
+        return resultJson;
     }
 
     /**
