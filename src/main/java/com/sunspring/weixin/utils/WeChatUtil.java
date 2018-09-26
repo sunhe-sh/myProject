@@ -16,7 +16,6 @@ import java.util.Map;
  */
 @Component
 public class WeChatUtil {
-
     public static final String TOKEN = "wx_service_sh";
     private static final String APP_ID = "wx132b689efeb0f7d7";
     private static final String APP_SECRET = "c346c42697194237ba92cf203658b58a";
@@ -29,9 +28,13 @@ public class WeChatUtil {
      */
     private static final String DELETE_MENU_URL = "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=ACCESS_TOKEN";
     /**
-     * 获取accessToke接口
+     * 获取基本accessToke接口
      */
     private static final String GET_ACCESSTOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
+    /**
+     * 获取网页授权的accessToke接口
+     */
+    private static final String GET_WEB_ACCESSTOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code";
     /**
      * 发送模板消息接口
      */
@@ -44,30 +47,79 @@ public class WeChatUtil {
      * 通过ticket换取二维码接口
      */
     private static final String QRCODE_GET_URL = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=TICKET";
+    /**
+     * 获取网页授权的用户信息接口
+     */
+    private static final String GET_WEB_USER_INFO = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
+
+
+
 
     /**
-     * 通信token
+     * webAccesstoken
      */
-    private static String accessToken;
+    private static Map<String, JSONObject> webAccessTokenInfo;
     /**
-     * token有效期
+     * webAccesstoken 有效期
      */
-    private static Long expireTime;
+    private static Map<String, Long> web_accesstoken_expireTime;
     /**
-     * 获取Accesstoken凭据
+     * 获取网页授权的 accesstoken 凭据
+     * @return webAccesstokenInfo
+     */
+    public static JSONObject getWebAccessToken(String code) {
+        //accessToken为空 或 已经失效时进行重新获取
+        if(WeChatUtil.webAccessTokenInfo.get(code) == null || System.currentTimeMillis() > WeChatUtil.web_accesstoken_expireTime.get(code)){
+            JSONObject jsonObject = HttpUtil.get(
+                    GET_WEB_ACCESSTOKEN_URL.replace("APPID", APP_ID)
+                            .replace("APPSECRET", APP_SECRET)
+                            .replace("CODE", code)
+            );
+            //凭据信息
+            WeChatUtil.webAccessTokenInfo.put(code, jsonObject) ;
+            //有效期
+            Long expires_in = jsonObject.getLong("expires_in");
+            WeChatUtil.web_accesstoken_expireTime.put(code, System.currentTimeMillis() + ((expires_in - 60) * 1000));
+        }
+        return WeChatUtil.webAccessTokenInfo.get(code);
+    }
+
+    /**
+     * 基本accesstoken
+     */
+    private static String base_accessToken;
+    /**
+     * 基本accesstoken有效期
+     */
+    private static Long base_accesstoken_expireTime;
+    /**
+     * 获取基本Accesstoken凭据
      * @return accessToken
      */
     private static String getAccessToken() {
         //accessToken为空 或 已经失效时进行重新获取
-        if(StringUtils.isEmpty(WeChatUtil.accessToken) || System.currentTimeMillis() > WeChatUtil.expireTime){
+        if(StringUtils.isEmpty(WeChatUtil.base_accessToken) || System.currentTimeMillis() > WeChatUtil.base_accesstoken_expireTime){
             JSONObject jsonObject = HttpUtil.get(GET_ACCESSTOKEN_URL.replace("APPID",APP_ID).replace("APPSECRET",APP_SECRET));
             //凭据
-            WeChatUtil.accessToken = jsonObject.getString("access_token");
+            WeChatUtil.base_accessToken = jsonObject.getString("access_token");
             //有效期
             Long expires_in = jsonObject.getLong("expires_in");
-            WeChatUtil.expireTime = System.currentTimeMillis() + ((expires_in - 60) * 1000);
+            WeChatUtil.base_accesstoken_expireTime = System.currentTimeMillis() + ((expires_in - 60) * 1000);
         }
-        return WeChatUtil.accessToken;
+        return WeChatUtil.base_accessToken;
+    }
+
+
+    /**
+     * 获取网页授权的用户信息
+     */
+    public static JSONObject getWebUserInfo(String webAccesstoken, String openId) {
+        JSONObject resultJson =  HttpUtil.get(
+                GET_WEB_USER_INFO.replace("ACCESS_TOKEN",webAccesstoken)
+                        .replace("OPENID", openId)
+        );
+        System.out.println(">>>getWebUserInfo>>>>>>>>>>>>>>>>>>>>"+resultJson);
+        return resultJson;
     }
 
     private static String jsonMenu = "{\n" +
@@ -78,9 +130,9 @@ public class WeChatUtil {
             "          \"key\":\"V1001_SCANCODE_PUSH\"\n" +
             "      },\n" +
             "     {    \n" +
-            "          \"type\":\"click\",\n" +
+            "          \"type\":\"view\",\n" +
             "          \"name\":\"预约取号\",\n" +
-            "          \"key\":\"V1001_CURRENT_TIME\"\n" +
+            "          \"url\":\"http://hmfp35.natappfree.cc/api/wechat/appointment\"\n" +
             "      },\n" +
             "     {    \n" +
             "          \"type\":\"location_select\",\n" +
@@ -170,12 +222,12 @@ public class WeChatUtil {
      * 生成二维码图片，并返回地址
      * @param paramDTO
      */
-    public static Object getQrcodeUrl(CreateQrcodeParamDTO paramDTO) {
+    public static String getQrcodeUrl(CreateQrcodeParamDTO paramDTO) {
         JSONObject resultJson =  createQrcode(paramDTO);
         if(resultJson != null && !resultJson.containsKey("errcode")){
             return QRCODE_GET_URL.replace("TICKET",  (String)resultJson.get("ticket"));
         }
-        return resultJson;
+        return resultJson.toString();
     }
 
     /**
@@ -189,14 +241,14 @@ public class WeChatUtil {
 
     public static void main(String[] args) {
 
-        createQrcode_TEST();
+//        createQrcode_TEST();
 
 //        createMenu(jsonMenu);
 
-//        System.out.println(WeixinUtil.accessToken);
-//        System.out.println(getAccessToken());
-//        System.out.println(getAccessToken());
-//        System.out.println(getAccessToken());
+        System.out.println(WeChatUtil.base_accessToken);
+        System.out.println(getAccessToken());
+        System.out.println(getAccessToken());
+        System.out.println(getAccessToken());
 
 //        sendTemplateMsg_TEST();
     }

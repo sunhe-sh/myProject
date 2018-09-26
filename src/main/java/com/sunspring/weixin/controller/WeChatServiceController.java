@@ -3,6 +3,8 @@ package com.sunspring.weixin.controller;
 import com.sunspring.weixin.dto.CreateQrcodeParamDTO;
 import com.sunspring.weixin.service.WeChatService;
 import com.sunspring.weixin.dto.InMessageDTO;
+import com.sunspring.weixin.utils.WeChatUtil;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +48,25 @@ public class WeChatServiceController {
     @ResponseBody
     public Object createQrcode(@RequestBody CreateQrcodeParamDTO paramDTO) {
        return weChatService.createQrcode(paramDTO);
+    }
+
+    /**
+     * 通过网页授权回传的code获取用户信息
+     * @param code
+     * @return
+     */
+    @GetMapping("/getUserInfo")
+    @ResponseBody
+    public JSONObject getUserInfo(String code) {
+        System.out.println("code>>>>" + code);
+        //通过code获取网页授权的accesstoken信息
+        JSONObject accesstokenInfo = WeChatUtil.getWebAccessToken(code);
+        String webAccesstoken = accesstokenInfo.getString("accesstoken");
+        String openId = accesstokenInfo.getString("openId");
+        //拉取用户信息
+        JSONObject userInfo = WeChatUtil.getWebUserInfo(webAccesstoken, openId);
+
+        return userInfo;
     }
 
 
