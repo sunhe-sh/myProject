@@ -1,7 +1,7 @@
 package com.sunspring.weixin.enums;
 
 /**
-* @Description  事件类型
+* @Description  生成二维码的action_name参数
 * @Author sunhe
 * @Date
 **/

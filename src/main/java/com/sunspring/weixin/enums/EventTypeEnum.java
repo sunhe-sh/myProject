@@ -7,8 +7,8 @@ package com.sunspring.weixin.enums;
 **/
 public enum EventTypeEnum {
     //
-    SUBSCRIBE("subscribe","订阅事件"),
-    UNSUBSCRIBE("unsubscribe","取消订阅事件"),
+    SUBSCRIBE("subscribe","关注事件"),
+    UNSUBSCRIBE("unsubscribe","取消关注事件"),
     SCAN("SCAN","二维码扫码（用户已关注时的事件推送）"),
     LOCATION("LOCATION","上报地理位置事件"),
     CLICK("CLICK","点击菜单拉取消息时的事件"),

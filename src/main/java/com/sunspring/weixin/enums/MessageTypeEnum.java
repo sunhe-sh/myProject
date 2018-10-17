@@ -1,8 +1,5 @@
 package com.sunspring.weixin.enums;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
 * @Description  消息类型
 * @Author sunhe

@@ -1,24 +1,33 @@
 package com.sunspring.weixin.utils;
 
 import com.sunspring.weixin.dto.CreateQrcodeParamDTO;
+import com.sunspring.weixin.dto.LocationReportDTO;
 import com.sunspring.weixin.dto.TemplateMessageDTO;
 import com.sunspring.weixin.dto.TemplateMessageDataItem;
+import com.sunspring.weixin.enums.AuthorizeScopeTypeEnum;
 import com.sunspring.weixin.enums.QrcodeActionNameEnum;
 import net.sf.json.JSONObject;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author sunhe
  */
-@Component
 public class WeChatUtil {
+
     public static final String TOKEN = "wx_service_sh";
-    private static final String APP_ID = "wx132b689efeb0f7d7";
+    public static final String APP_ID = "wx132b689efeb0f7d7";
     private static final String APP_SECRET = "c346c42697194237ba92cf203658b58a";
+    /**
+     * 存储用户位置信息，定时清空
+     * key: 微信用户openId
+     * value： LocationReportDTO
+     */
+    public static Map<String, LocationReportDTO> locationMap = new HashMap <>();
     /**
      * 创建自定义菜单接口
      */
@@ -50,7 +59,17 @@ public class WeChatUtil {
     /**
      * 获取网页授权的用户信息接口
      */
-    private static final String GET_WEB_USER_INFO = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
+    private static final String GET_WEB_USER_INFO_URL = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
+
+    /**
+     * 获取用户基本信息接口（已关注的用户）（包括UnionID机制）
+     */
+    private static final String GET_COMMON_USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
+
+    /**
+     * 获取用户授权，并返回code
+     */
+    public static final String REDIRECT_WITH_CODE_URL = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=REDIRECT_URI&response_type=code&scope=SCOPE&state=STATE#wechat_redirect";
 
 
 
@@ -58,30 +77,37 @@ public class WeChatUtil {
     /**
      * webAccesstoken
      */
-    private static Map<String, JSONObject> webAccessTokenInfo;
+    private static Map<String, JSONObject> webAccessTokenInfo = new HashMap <>();
     /**
      * webAccesstoken 有效期
      */
-    private static Map<String, Long> web_accesstoken_expireTime;
+    private static Map<String, Long> web_accesstoken_expireTime = new HashMap <>();
     /**
      * 获取网页授权的 accesstoken 凭据
      * @return webAccesstokenInfo
      */
     public static JSONObject getWebAccessToken(String code) {
         //accessToken为空 或 已经失效时进行重新获取
-        if(WeChatUtil.webAccessTokenInfo.get(code) == null || System.currentTimeMillis() > WeChatUtil.web_accesstoken_expireTime.get(code)){
+        if(webAccessTokenInfo.get(code) == null ||
+                web_accesstoken_expireTime.get(code) == null ||
+                System.currentTimeMillis() > web_accesstoken_expireTime.get(code)){
             JSONObject jsonObject = HttpUtil.get(
                     GET_WEB_ACCESSTOKEN_URL.replace("APPID", APP_ID)
-                            .replace("APPSECRET", APP_SECRET)
+                            .replace("SECRET", APP_SECRET)
                             .replace("CODE", code)
             );
+            if(jsonObject.get("errcode") != null){
+                System.out.println(">>>getWebAccessToken>>>>>>>>>>>>>>>>>>>>"+jsonObject);
+                return jsonObject;
+            }
             //凭据信息
-            WeChatUtil.webAccessTokenInfo.put(code, jsonObject) ;
+            webAccessTokenInfo.put(code, jsonObject) ;
             //有效期
             Long expires_in = jsonObject.getLong("expires_in");
-            WeChatUtil.web_accesstoken_expireTime.put(code, System.currentTimeMillis() + ((expires_in - 60) * 1000));
+            web_accesstoken_expireTime.put(code, System.currentTimeMillis() + ((expires_in - 60) * 1000));
         }
-        return WeChatUtil.webAccessTokenInfo.get(code);
+        System.out.println(">>>getWebAccessToken>>>>>>>>>>>>>>>>>>>>"+webAccessTokenInfo.get(code));
+        return webAccessTokenInfo.get(code);
     }
 
     /**
@@ -106,40 +132,88 @@ public class WeChatUtil {
             Long expires_in = jsonObject.getLong("expires_in");
             WeChatUtil.base_accesstoken_expireTime = System.currentTimeMillis() + ((expires_in - 60) * 1000);
         }
+        System.out.println(">>>getAccessToken>>>>>>>>>>>>>>>>>>>>"+WeChatUtil.base_accessToken);
         return WeChatUtil.base_accessToken;
     }
 
+
+
+    /**
+     * 获取已关注的用户信息
+     */
+    public static JSONObject getCommonUserInfo(String openId) {
+        JSONObject resultJson =  HttpUtil.get(
+                GET_COMMON_USER_INFO_URL.replace("ACCESS_TOKEN",getAccessToken())
+                        .replace("OPENID", openId)
+        );
+        System.out.println(">>>getCommonUserInfo>>>>>>>>>>>>>>>>>>>>"+resultJson);
+        return resultJson;
+    }
 
     /**
      * 获取网页授权的用户信息
      */
     public static JSONObject getWebUserInfo(String webAccesstoken, String openId) {
         JSONObject resultJson =  HttpUtil.get(
-                GET_WEB_USER_INFO.replace("ACCESS_TOKEN",webAccesstoken)
+                GET_WEB_USER_INFO_URL.replace("ACCESS_TOKEN",webAccesstoken)
                         .replace("OPENID", openId)
         );
         System.out.println(">>>getWebUserInfo>>>>>>>>>>>>>>>>>>>>"+resultJson);
         return resultJson;
     }
 
-    private static String jsonMenu = "{\n" +
-            "     \"button\":[\n" +
-            "     {    \n" +
-            "          \"type\":\"scancode_push\",\n" +
-            "          \"name\":\"扫码取号\",\n" +
-            "          \"key\":\"V1001_SCANCODE_PUSH\"\n" +
-            "      },\n" +
-            "     {    \n" +
-            "          \"type\":\"view\",\n" +
-            "          \"name\":\"预约取号\",\n" +
-            "          \"url\":\"http://hmfp35.natappfree.cc/api/wechat/appointment\"\n" +
-            "      },\n" +
-            "     {    \n" +
-            "          \"type\":\"location_select\",\n" +
-            "          \"name\":\"我的\",\n" +
-            "          \"key\":\"V1001_LOCATION_SELECT\"\n" +
-            "      }" +
-            " }";
+    private static String jsonMenu;
+
+    static {
+        try {
+            jsonMenu = "{\n" +
+                    "     \"button\":[\n" +
+                    "     {    \n" +
+                    "          \"type\":\"scancode_push\",\n" +
+                    "          \"name\":\"扫码取号\",\n" +
+                    "          \"key\":\"V1001_SCANCODE_PUSH\"\n" +
+                    "      },\n" +
+                    "     {    \n" +
+                    "          \"type\":\"view\",\n" +
+                    "          \"name\":\"预约取号\",\n" +
+                    "          \"url\":\""+ REDIRECT_WITH_CODE_URL
+                    .replace("APPID", APP_ID)
+                    .replace("REDIRECT_URI", URLEncoder.encode("http://127.0.0.1:8090/api/wechat/appointment_menu","UTF-8"))
+                    .replace("SCOPE", AuthorizeScopeTypeEnum.SNSAPI_BASE.getType())
+                    +"\"\n" +
+                    "      },\n" +
+                    "     {    \n" +
+                    "          \"type\":\"view\",\n" +
+                    "          \"name\":\"我的\",\n" +
+                    "          \"url\":\""+ REDIRECT_WITH_CODE_URL
+                    .replace("APPID", APP_ID)
+                    .replace("REDIRECT_URI", URLEncoder.encode("http://127.0.0.1:8090/api/wechat/serviceHistory_view","UTF-8"))
+                    .replace("SCOPE", AuthorizeScopeTypeEnum.SNSAPI_BASE.getType())
+                    +"\"\n" +
+                    "      }" +
+                    " }";
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 创建自定义菜单
+     * @param jsonParam json数据
+     */
+    public static void createMenu(String jsonParam) {
+        JSONObject resultJson =  HttpUtil.post(CREATE_MENU_URL.replace("ACCESS_TOKEN",getAccessToken()),jsonParam);
+        System.out.println(">>>createMenu>>>>>>>>>>>>>>>>>>>>"+resultJson);
+    }
+
+    /**
+     * 删除自定义菜单
+     */
+    public static void deleteMenu() {
+        JSONObject resultJson =  HttpUtil.get(DELETE_MENU_URL.replace("ACCESS_TOKEN",getAccessToken()));
+        System.out.println(">>>deleteMenu>>>>>>>>>>>>>>>>>>>>"+resultJson);
+    }
+
 
     private static String jsonTemplateMsg = "{\n" +
             "           \"touser\":\"ohm_z1EjFrY2vTmLbRSK0haIV10w\",\n" +
@@ -177,26 +251,6 @@ public class WeChatUtil {
             "           }\n" +
             "       }";
 
-
-    private static String qrcodeParam = "{\"expire_seconds\": 604800, \"action_name\": \"QR_STR_SCENE\", \"action_info\": {\"scene\": {\"scene_str\": \"SCAN_QRCODE_NUM\",\"scene_id\":}}}";
-
-    /**
-     * 创建自定义菜单
-     * @param jsonParam json数据
-     */
-    public static void createMenu(String jsonParam) {
-        JSONObject resultJson =  HttpUtil.post(CREATE_MENU_URL.replace("ACCESS_TOKEN",getAccessToken()),jsonParam);
-        System.out.println(">>>createMenu>>>>>>>>>>>>>>>>>>>>"+resultJson);
-    }
-
-    /**
-     * 删除自定义菜单
-     */
-    public static void deleteMenu() {
-        JSONObject resultJson =  HttpUtil.get(DELETE_MENU_URL.replace("ACCESS_TOKEN",getAccessToken()));
-        System.out.println(">>>deleteMenu>>>>>>>>>>>>>>>>>>>>"+resultJson);
-    }
-
     /**
      * 发送模板消息
      */
@@ -205,6 +259,7 @@ public class WeChatUtil {
         System.out.println(">>>sendTemplateMessage>>>>>>>>>>>>>>>>>" + resultJson);
     }
 
+    private static String qrcodeParam = "{\"expire_seconds\": 604800, \"action_name\": \"QR_STR_SCENE\", \"action_info\": {\"scene\": {\"scene_str\": \"SCAN_QRCODE_NUM\",\"scene_id\":}}}";
     /**
      * 创建带参数的公众号二维码图片
      * @param paramDTO
@@ -224,6 +279,7 @@ public class WeChatUtil {
      */
     public static String getQrcodeUrl(CreateQrcodeParamDTO paramDTO) {
         JSONObject resultJson =  createQrcode(paramDTO);
+        System.out.println("getQrcodeUrl>>>>>>>>>>>>>>" + resultJson.toString());
         if(resultJson != null && !resultJson.containsKey("errcode")){
             return QRCODE_GET_URL.replace("TICKET",  (String)resultJson.get("ticket"));
         }
@@ -241,14 +297,13 @@ public class WeChatUtil {
 
     public static void main(String[] args) {
 
+//        getCommonUserInfo("ohm_z1EjFrY2vTmLbRSK0haIV10w");
+
 //        createQrcode_TEST();
 
-//        createMenu(jsonMenu);
+        createMenu(jsonMenu);
 
-        System.out.println(WeChatUtil.base_accessToken);
-        System.out.println(getAccessToken());
-        System.out.println(getAccessToken());
-        System.out.println(getAccessToken());
+//        System.out.println(getAccessToken());
 
 //        sendTemplateMsg_TEST();
     }

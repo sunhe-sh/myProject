@@ -3,10 +3,6 @@ package com.sunspring.weixin.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * @author sunhe
  */
@@ -23,11 +19,11 @@ public class CreateQrcodeParamDTO {
      */
     private String action_name;
     /**
-     * 场景值ID，临时二维码时为32位非0整型，永久二维码时最大值为100000（目前参数只支持1--100000）
+     * 场景值ID（字符串形式的ID），字符串类型，长度限制为1到64
      */
     private String scene_str;
     /**
-     * 场景值ID（字符串形式的ID），字符串类型，长度限制为1到64
+     * 场景值ID，临时二维码时为32位非0整型，永久二维码时最大值为100000（目前参数只支持1--100000）
      */
     private Long scene_id;
 
